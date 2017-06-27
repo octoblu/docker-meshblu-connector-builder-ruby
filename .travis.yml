@@ -13,8 +13,6 @@ matrix:
     cache:
       directories:
       - "$HOME/docker"
-    install:
-    - docker pull octoblu/meshblu-connector-builder-ruby:linux-armv7
     script:
     - |
       pushd $PWD/linux-armv7
