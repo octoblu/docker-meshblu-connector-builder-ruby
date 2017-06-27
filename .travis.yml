@@ -1,0 +1,29 @@
+branches:
+  only:
+  - master
+matrix:
+  fast_finish: true
+  include:
+  - os: linux
+    dist: trusty
+    language: shell
+    sudo: required
+    services:
+    - docker
+    cache:
+      directories:
+      - "$HOME/docker"
+    install:
+    - docker pull octoblu/meshblu-connector-builder-ruby:linux-armv7
+    script:
+    - |
+      pushd $PWD/linux-armv7
+        docker build -t octoblu/meshblu-connector-builder-ruby:linux-armv7 . || exit 1
+      popd
+    after_success:
+    - docker login --username="$DOCKER_USERNAME" --password="$DOCKER_PASSWORD"
+    - docker push meshblu-connector-builder-ruby:linux-armv7
+env:
+  global:
+  - secure: NJgokdNQyh4mpdCSr40euNI6ARhA0LVZGbKpVbiAR+nIPqrFHyy9Drr4frzFk+r3hcOsuWmNIB6AVgE84ZwjJCdV6lQrIrb+vP62Xu1ty4P0SoM/HxHrh+V+5eHxbYsR8BkghT7dTMwBs1cSnh4oiGAJScbUhqBNoa7aWfb5E69/gezF6wEXF+o8UpStgbnoh/dTj7SNvKyk2j2HL3OjHY4n+7Kv7klSKPb4BapJUql6kiaa0lskGEzsdXr7LTbQBxAAC7vJm8+UXMjjJOBtAsol9LCxKWTbQrU/EBOijdHLhUfNd/dm0J2vzrgECxYKhGyIQd8DxYq/vQdEDkBuIvfTI7rMKQ6v5hP23rZAWJv+/O60gIVfab9jtik3GT69LUStzur3cUAkOmbCoLeTg4MRFDDFYBXS1BUIKJrWntK/oKbIle+9cRomm/RCtQ3NqsoojYxcwukYwrtjWdwzrmo7rVe8oeFpSs83DkU2qDYfIRf4B7mrthlEuCXJRpo8UIwg+SfqTXevDvhNjrLs1MAAkryMBaJVUU+bdIRiKROadtjP/urZKleiDCIUIjQTh4DjpvuIOJd8A44OT36ZwPeNHQeHb7XshGYV2F0jG8q1TIZgC7OC47WnKDLdK8B6MdpXmFaUC6QAPWToJVXNaTglb53ACjiJSdydE/spcO0=
+  - secure: bdjp0QXuJx0u38Z1qtBFgm7sAeSMrYYFtNsIzpDVEkkMTb+laThTgNx982RKuhx5pnkJ4VrAHnB2Bd2F5o06I/9KZh75VfDk1Eo/jX31HeKiLpDE9JkzG+T1Uyf0dxjO1TXCi8+HW8B4B+CmB+/xsXdU2RTt+8YEc/1r8dRfBJUbcf2nSqL3BQi/spfnmG0Y4tPc2mPL0qLMvOUCJ6bDwc7PnslpRxHSR5pdePt4XYZXWvCTJmsRGtEbmG06Sdo4vLYouqcQR+Inpdn9JwY1Rz+cW2jkiEl+wdqwShvTP0DW4HXFqY5gifJsI5Dpmzw6zaC9i9H0PSxuvTUw20COvDI7OlHWR3njB6kq624CEaw8Vb57om/a5lh3q8QkrdLGiAHKao5HpZ3G2O0iwC7yMkFZTX6i5/6u1tEbB+pOL4ZU9oivSyc6qvR8CzzXxFM5TQGrqZqAuH69HS6NFyxyu4tRHQMSOt/qBIQZakJUr/t00ef5mXjj2Y1cD3GiycrkvfId2mWKRnMQqGv+96qV4f66Z/2tvSllMwfLFz2+tBBhTVFWU7TYvWf9ylrhTodqkC7HRTjICm0GZl8V0Zl6DOGpuwwW5Kr9Rnvxj4Tyx/EX7S5wkKZgpw3sTK9IZ3C8crvNUF/nL3t0DglrFUT38RgRTCNTBTDWmSbostdb2LA=
