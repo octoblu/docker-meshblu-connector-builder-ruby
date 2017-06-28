@@ -2,6 +2,20 @@ FROM resin/armv7hf-debian-qemu
 
 RUN [ "cross-build-start" ]
 
+# skip installing gem documentation
+RUN mkdir -p /usr/local/etc \
+	&& { \
+		echo 'install: --no-document'; \
+		echo 'update: --no-document'; \
+	} >> /usr/local/etc/gemrc
+
+ENV RUBY_MAJOR 2.4
+ENV RUBY_VERSION 2.4.1
+ENV RUBY_DOWNLOAD_SHA256 4fc8a9992de3e90191de369270ea4b6c1b171b7941743614cc50822ddc1fe654
+ENV RUBYGEMS_VERSION 2.6.12
+
+RUN mkdir -p /usr/src/ruby
+
 RUN apt-get update \
 	&& apt-get install -y --no-install-recommends \
 		bzip2 \
@@ -13,15 +27,45 @@ RUN apt-get update \
 		libyaml-dev \
 		procps \
 		zlib1g-dev \
+		autoconf \
+		bison \
+		dpkg-dev \
+		gcc \
+		libbz2-dev \
+		libgdbm-dev \
+		libglib2.0-dev \
+		libncurses-dev \
+		libreadline-dev \
+		libxml2-dev \
+		libxslt-dev \
+		make \
+		ruby \
 	&& rm -rf /var/lib/apt/lists/*
 
-ENV RUBY_MAJOR 2.4
-ENV RUBY_VERSION 2.4.1
-ENV RUBY_DOWNLOAD_SHA256 a330e10d5cb5e53b3a0078326c5731888bb55e32c4abfeb27d9e7f8e5d000250
-
-# some of ruby's build scripts are written in ruby
-# we purge this later to make sure our final image uses what we just built
-RUN buildDeps=' \
+RUN set -ex \
+	&& curl -fSL -o ruby.tar.xz "https://cache.ruby-lang.org/pub/ruby/${RUBY_MAJOR%-rc}/ruby-$RUBY_VERSION.tar.xz" \
+	&& echo "$RUBY_DOWNLOAD_SHA256 *ruby.tar.xz" | sha256sum -c - \
+	&& mkdir -p /usr/src/ruby \
+	&& tar -xJf ruby.tar.xz -C /usr/src/ruby --strip-components=1 \
+	&& rm ruby.tar.xz \
+	&& cd /usr/src/ruby \
+	# hack in "ENABLE_PATH_CHECK" disabling to suppress:
+	#   warning: Insecure world writable dir
+	&& { \
+		echo '#define ENABLE_PATH_CHECK 0'; \
+		echo; \
+		cat file.c; \
+	} > file.c.new \
+	&& mv file.c.new file.c \
+	&& autoconf \
+	&& gnuArch="$(dpkg-architecture --query DEB_BUILD_GNU_TYPE)" \
+	&& ./configure \
+		--build="$gnuArch" \
+		--disable-install-doc \
+		--enable-shared \
+	&& make -j "$(nproc)" \
+	&& make install \
+	&& apt-get purge -y --auto-remove ' \
 		autoconf \
 		bison \
 		gcc \
@@ -35,34 +79,26 @@ RUN buildDeps=' \
 		make \
 		ruby \
 	' \
-	&& set -x \
-	&& apt-get update \
-	&& apt-get install -y --no-install-recommends $buildDeps \
-	&& rm -rf /var/lib/apt/lists/* \
-	&& mkdir -p /usr/src/ruby \
-	&& curl -fSL -o ruby.tar.gz "http://cache.ruby-lang.org/pub/ruby/$RUBY_MAJOR/ruby-$RUBY_VERSION.tar.gz" \
-	&& echo "$RUBY_DOWNLOAD_SHA256 *ruby.tar.gz" | sha256sum -c - \
-	&& tar -xzf ruby.tar.gz -C /usr/src/ruby --strip-components=1 \
-	&& rm ruby.tar.gz \
-	&& cd /usr/src/ruby \
-	&& autoconf \
-	&& ./configure --disable-install-doc \
-	&& make -j"$(nproc)" \
-	&& make install \
+	&& cd / \
 	&& rm -r /usr/src/ruby \
-	&& apt-get purge -y --auto-remove $buildDeps
+	&& gem update --system "$RUBYGEMS_VERSION"
 
 # skip installing gem documentation
-RUN echo 'gem: --no-rdoc --no-ri' >> /.gemrc
+RUN echo 'install: --no-document\nupdate: --no-document' >> /.gemrc
+
+ENV BUNDLER_VERSION 1.15.1
+
+RUN gem install bundler --version "$BUNDLER_VERSION"
 
 # install things globally, for great justice
+# and don't create ".bundle" in all our apps
 ENV GEM_HOME /usr/local/bundle
-ENV PATH $GEM_HOME/bin:$PATH
-RUN gem install bundler \
-  && bundle config --global path "$GEM_HOME" \
-  && bundle config --global bin "$GEM_HOME/bin"
-
-# don't create ".bundle" in all our apps
-ENV BUNDLE_APP_CONFIG $GEM_HOME
+ENV BUNDLE_PATH="$GEM_HOME" \
+	BUNDLE_BIN="$GEM_HOME/bin" \
+	BUNDLE_SILENCE_ROOT_WARNING=1 \
+	BUNDLE_APP_CONFIG="$GEM_HOME"
+ENV PATH $BUNDLE_BIN:$PATH
+RUN mkdir -p "$GEM_HOME" "$BUNDLE_BIN" \
+	&& chmod 777 "$GEM_HOME" "$BUNDLE_BIN"
 
 RUN [ "cross-build-end" ]
