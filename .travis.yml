@@ -3,9 +3,6 @@ services: docker
 branches:
   only:
   - master
-cache:
-  directories:
-  - "$HOME/docker"
 env:
   global:
   - secure: NJgokdNQyh4mpdCSr40euNI6ARhA0LVZGbKpVbiAR+nIPqrFHyy9Drr4frzFk+r3hcOsuWmNIB6AVgE84ZwjJCdV6lQrIrb+vP62Xu1ty4P0SoM/HxHrh+V+5eHxbYsR8BkghT7dTMwBs1cSnh4oiGAJScbUhqBNoa7aWfb5E69/gezF6wEXF+o8UpStgbnoh/dTj7SNvKyk2j2HL3OjHY4n+7Kv7klSKPb4BapJUql6kiaa0lskGEzsdXr7LTbQBxAAC7vJm8+UXMjjJOBtAsol9LCxKWTbQrU/EBOijdHLhUfNd/dm0J2vzrgECxYKhGyIQd8DxYq/vQdEDkBuIvfTI7rMKQ6v5hP23rZAWJv+/O60gIVfab9jtik3GT69LUStzur3cUAkOmbCoLeTg4MRFDDFYBXS1BUIKJrWntK/oKbIle+9cRomm/RCtQ3NqsoojYxcwukYwrtjWdwzrmo7rVe8oeFpSs83DkU2qDYfIRf4B7mrthlEuCXJRpo8UIwg+SfqTXevDvhNjrLs1MAAkryMBaJVUU+bdIRiKROadtjP/urZKleiDCIUIjQTh4DjpvuIOJd8A44OT36ZwPeNHQeHb7XshGYV2F0jG8q1TIZgC7OC47WnKDLdK8B6MdpXmFaUC6QAPWToJVXNaTglb53ACjiJSdydE/spcO0=
