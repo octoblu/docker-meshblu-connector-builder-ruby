@@ -1,4 +1,4 @@
-FROM resin/armv7hf-debian-qemu
+FROM octoblu/armv7hf-debian-qemu
 
 RUN [ "cross-build-start" ]
 RUN apt-get update \
@@ -97,5 +97,5 @@ ENV BUNDLE_PATH="$GEM_HOME" \
 ENV PATH $BUNDLE_BIN:$PATH
 RUN mkdir -p "$GEM_HOME" "$BUNDLE_BIN" \
 	&& chmod 777 "$GEM_HOME" "$BUNDLE_BIN"
-	
+
 RUN [ "cross-build-end" ]
