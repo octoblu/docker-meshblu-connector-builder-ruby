@@ -21,7 +21,6 @@ script:
     docker build \
       --rm=false \
       --quiet \
-      --squash \
       --compress \
       --tag octoblu/meshblu-connector-builder-ruby:linux-armv7 . || exit 1
   popd
