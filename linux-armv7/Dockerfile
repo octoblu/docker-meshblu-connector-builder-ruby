@@ -1,4 +1,4 @@
-FROM octoblu/meshblu-connector-builder-ruby-base:linux-armv7
+FROM octoblu/meshblu-connector-builder-base-ruby:linux-armv7
 
 ENV RUBY_MAJOR 2.4
 ENV RUBY_VERSION 2.4.1
